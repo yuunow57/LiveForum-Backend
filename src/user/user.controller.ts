@@ -5,22 +5,22 @@ import { UserService } from './user.service';
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Get()
+    @Get() // GET /user
     getAll() {
         return this.userService.findAll();
     }
 
-    @Post()
+    @Post() // POST /user
     create(@Body() body: { username: string; password: string}) {
         return this.userService.create(body.username, body.password);
     }
 
-    @Get(':id')
+    @Get(':id') // GET /user/:id
     getOne(@Param('id') id: number) {
         return this.userService.findOne(id);
     }
 
-    @Delete(':id')
+    @Delete(':id') // DELETE /user/:id
     remove(@Param('id') id: number) {
         return this.userService.remove(id);
     }
