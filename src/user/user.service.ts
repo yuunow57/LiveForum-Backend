@@ -16,15 +16,15 @@ export class UserService {
         return this.userRepository.find();
     }
 
+    // GET /user/:id
+    findOne(id: number) {
+        return this.userRepository.findOneBy({ id });
+    }
+    
     // POST /user
     create(username: string, password: string) { 
         const user = this.userRepository.create({ username, password });
         return this.userRepository.save(user);
-    }
-
-    // GET /user/:id
-    findOne(id: number) {
-        return this.userRepository.findOneBy({ id });
     }
     
     // DELETE /user/:id
