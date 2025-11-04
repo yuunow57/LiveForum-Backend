@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-// import { Post } from '../post/post.entity';
+import { Post } from '../post/post.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Board {
@@ -12,9 +13,10 @@ export class Board {
     @Column({ nullable: true })
     description: string;
 
+    @Exclude()
     @CreateDateColumn()
-    createdAt: Date;
+    createAt: Date;
 
-    // @OneToMany(() => Post, (post) => post.board)
-    // posts: Post[];
+    @OneToMany(() => Post, (posts) => posts.board)
+    posts: Post[];
 }

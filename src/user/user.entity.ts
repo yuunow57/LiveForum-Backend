@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Post } from '../post/post.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -8,9 +10,14 @@ export class User {
     @Column({ unique: true })
     username: string;
 
+    @Exclude()
     @Column()
     password: string;
 
+    @Exclude()
     @CreateDateColumn() // 레코드가 처음 만들어진 시각을 기록
     createAt: Date;
+
+    @OneToMany(() => Post, (posts) => posts.author)
+    posts: Post[];
 }

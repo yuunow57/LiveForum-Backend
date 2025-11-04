@@ -1,0 +1,27 @@
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from "typeorm";
+import { Exclude } from "class-transformer";
+import { Board } from "../board/board.entity";
+import { User } from "../user/user.entity";
+
+@Entity()
+export class Post {
+
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    title: string;
+
+    @Column({ type: 'text' })
+    content: string;
+
+    @Exclude()
+    @CreateDateColumn()
+    createAt: Date;
+
+    @ManyToOne(() => Board, (board) => board.posts, { eager: true })
+    board: Board;
+
+    @ManyToOne(() => User, (user) => user.posts, { eager: true })
+    author: User;
+}

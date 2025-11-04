@@ -6,6 +6,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { BoardModule } from './board/board.module';
 import { Board } from './board/board.entity';
+import { PostModule } from './post/post.module';
+import { Post } from './post/post.entity';
 
 
 @Module({
@@ -18,12 +20,13 @@ import { Board } from './board/board.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Board],
+      entities: [User, Board, Post],
       synchronize: true,
     }),
     UserModule,
     AuthModule,
     BoardModule,
+    PostModule,
   ],
 })
 export class AppModule {}
