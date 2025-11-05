@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 import { Post } from '../post/post.entity';
+import { Comment } from "../comment/comment.entity";
 import { Exclude } from 'class-transformer';
 
 @Entity()
@@ -20,4 +21,7 @@ export class User {
 
     @OneToMany(() => Post, (posts) => posts.author)
     posts: Post[];
+
+    @OneToMany(() => Comment, (comments) => comments.author)
+    comments: Comment[];
 }

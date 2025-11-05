@@ -8,6 +8,8 @@ import { BoardModule } from './board/board.module';
 import { Board } from './board/board.entity';
 import { PostModule } from './post/post.module';
 import { Post } from './post/post.entity';
+import { CommentModule } from './comment/comment.module';
+import { Comment } from './comment/comment.entity';
 
 
 @Module({
@@ -20,13 +22,14 @@ import { Post } from './post/post.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Board, Post],
+      entities: [User, Board, Post, Comment],
       synchronize: true,
     }),
     UserModule,
     AuthModule,
     BoardModule,
     PostModule,
+    CommentModule,
   ],
 })
 export class AppModule {}

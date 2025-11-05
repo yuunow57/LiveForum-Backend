@@ -15,7 +15,7 @@ export class PostService {
 
     // Get /posts
     async findAll() {
-        return this.postRepository.find({ order: { createAt: 'DESC' } });
+        return plainToInstance(Post, this.postRepository.find({ order: { createAt: 'DESC' } }));
     }
 
     // Get /posts/:id
