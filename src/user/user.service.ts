@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -18,7 +18,9 @@ export class UserService {
 
     // GET /user/:id
     findOne(id: number) {
-        return this.userRepository.findOneBy({ id });
+        const user = this.userRepository.findOne({ where: { id } });
+        if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
+        return user;
     }
     
     // POST /user

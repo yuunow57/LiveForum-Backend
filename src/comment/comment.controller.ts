@@ -27,7 +27,7 @@ export class CommentController {
     @ApiOperation({ summary: '댓글 작성 (로그인 필요)' })
     async create(@Req() req, @Body() body: { content: string, postId: number }) {
         const user = await this.userService.findOne(req.user.userId);
-        if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.');
+        if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
         const post = await this.postService.findOne(body.postId);
         return this.commentService.create(body.content, user, post);
     }

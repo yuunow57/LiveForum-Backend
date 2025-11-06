@@ -35,8 +35,7 @@ export class PostController {
     @ApiOperation({ summary: '게시글 작성 (로그인 필요)' })
     async create(@Req() req, @Body() body: { title: string, content: string, boardId: number }) {
         const user = await this.userService.findOne(req.user.userId);
-        if (!user) throw new NotFoundException('사용자를 찾을 수 없습니다.'); // create()에 요소로 들어갈 user가 Null일 가능성을 없앰
-
+        if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
         const board = await this.boardService.findOne(body.boardId);
         return this.postService.create(body.title, body.content, user, board);
     }
