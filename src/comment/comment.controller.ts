@@ -4,6 +4,7 @@ import { CommentService } from './comment.service';
 import { UserService } from '../user/user.service';
 import { PostService } from '../post/post.service';
 import { Public } from '../common/decorators/public.decorator';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @ApiTags('Comment')
 @Controller('comments')
@@ -25,11 +26,11 @@ export class CommentController {
     @Post()
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '댓글 작성 (로그인 필요)' })
-    async create(@Req() req, @Body() body: { content: string, postId: number }) {
+    async create(@Req() req, @Body() dto: CreateCommentDto) {
         const user = await this.userService.findOne(req.user.userId);
         if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
-        const post = await this.postService.findOne(body.postId);
-        return this.commentService.create(body.content, user, post);
+        const post = await this.postService.findOne(dto.postId);
+        return this.commentService.create(dto, user, post);
     }
 
     @Delete(':id')

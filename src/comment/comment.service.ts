@@ -5,6 +5,7 @@ import { plainToInstance } from 'class-transformer';
 import { Comment } from './comment.entity';
 import { User } from '../user/user.entity';
 import { Post } from '../post/post.entity';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentService {
@@ -29,9 +30,9 @@ export class CommentService {
     }
 
     // Post /comments
-    async create(content: string, user: User, post: Post) {
+    async create(dto: CreateCommentDto, user: User, post: Post) {
         const comment = this.commentRepository.create({
-            content,
+            content: dto.content,
             author: user,
             post,
         });

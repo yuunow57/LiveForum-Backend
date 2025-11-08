@@ -4,6 +4,7 @@ import { PostService } from './post.service';
 import { UserService } from '../user/user.service';
 import { BoardService } from '../board/board.service';
 import { Public } from '../common/decorators/public.decorator';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -33,11 +34,11 @@ export class PostController {
     @Post()
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '게시글 작성 (로그인 필요)' })
-    async create(@Req() req, @Body() body: { title: string, content: string, boardId: number }) {
+    async create(@Req() req, @Body() dto: CreatePostDto) {
         const user = await this.userService.findOne(req.user.userId);
         if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
-        const board = await this.boardService.findOne(body.boardId);
-        return this.postService.create(body.title, body.content, user, board);
+        const board = await this.boardService.findOne(dto.boardId);
+        return this.postService.create(dto, user, board);
     }
 
     @Delete(':id')

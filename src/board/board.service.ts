@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Board } from './board.entity';
+import { CreateBoardDto } from './dto/create-board.dto';
 
 @Injectable()
 export class BoardService {
@@ -23,8 +24,8 @@ export class BoardService {
     }
 
     // Post /boards
-    async create(name: string, description?: string) {
-        const board = this.boardRepository.create({ name, description });
+    async create(dto: CreateBoardDto) {
+        const board = this.boardRepository.create(dto);
         return this.boardRepository.save(board);
     }
 

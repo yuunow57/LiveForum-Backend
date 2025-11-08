@@ -5,6 +5,7 @@ import { plainToInstance } from 'class-transformer';
 import { Post } from './post.entity';
 import { User } from '../user/user.entity';
 import { Board } from '../board/board.entity';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Injectable()
 export class PostService {
@@ -26,10 +27,10 @@ export class PostService {
     }
 
     // Post /posts
-    async create(title: string, content: string, user: User, board: Board) {
+    async create(dto: CreatePostDto, user: User, board: Board) {
         const post = this.postRepository.create({
-            title,
-            content,
+            title: dto.title,
+            content: dto.content,
             author: user,
             board,
         });

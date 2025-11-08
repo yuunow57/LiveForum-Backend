@@ -2,6 +2,7 @@ import { Controller, Body, Post, Get, Delete, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BoardService } from './board.service';
 import { Public } from 'src/common/decorators/public.decorator';
+import { CreateBoardDto } from './dto/create-board.dto';
 
 @ApiTags('Board')
 @Controller('boards')
@@ -27,8 +28,8 @@ export class BoardController {
     @Post()
     @ApiBearerAuth('access-token') // Swagger토큰
     @ApiOperation({ summary: '게시판 생성 (관리자 전용)' })
-    create(@Body() body: {name: string, description?: string}) {
-        return this.boardService.create(body.name, body.description);
+    create(@Body() dto: CreateBoardDto) {
+        return this.boardService.create(dto);
     }
 
     @Delete(':id')
