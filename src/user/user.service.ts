@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { UpdateUserDto } from '../auth/dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -17,25 +19,41 @@ export class UserService {
     }
 
     // GET /user/:id
-    findOne(id: number) {
-        const user = this.userRepository.findOne({ where: { id } });
+    async findOne(id: number) {
+        const user = await this.userRepository.findOne({ where: { id } });
         if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
         return user;
     }
     
     // POST /user
-    create(username: string, password: string) { 
-        const user = this.userRepository.create({ username, password });
+    async create(dto: CreateUserDto) { 
+        const user = this.userRepository.create({
+            username: dto.username,
+            email: dto.email,
+            password: dto.password
+        });
+        return this.userRepository.save(user);
+    }
+
+    // PUT /user
+    async update(id: number, dto: UpdateUserDto) {
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) throw new NotFoundException('존재하지 않는 회원입니다.');
+        
+        if (dto.username !== undefined) user.username = dto.username;
+        if (dto.email !== undefined) user.email = dto.email;
+        if (dto.password !== undefined) user.password = dto.password;
+
         return this.userRepository.save(user);
     }
     
     // DELETE /user/:id
-    remove(id: number) {
+    async remove(id: number) {
         return this.userRepository.delete({ id });
     }
 
     // POST /auth/login
-    findByUsername(username: string) {
-        return this.userRepository.findOneBy({ username });
+    findByEmail(email: string) {
+        return this.userRepository.findOneBy({ email });
     }
 }

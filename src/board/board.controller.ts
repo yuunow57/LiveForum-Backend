@@ -34,7 +34,7 @@ export class BoardController {
 
     @Delete(':id')
     @ApiBearerAuth('access-token')
-    @ApiOperation({ summary: '게시판 삭제 (관리자 전용' })
+    @ApiOperation({ summary: '게시판 삭제 (관리자 전용)' })
     remove(@Param('id') id: number) {
         return this.boardService.remove(id);
     }

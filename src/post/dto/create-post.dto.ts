@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber } from "class-validator";
+import { IsString, IsNotEmpty, IsInt } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreatePostDto {
@@ -13,7 +13,7 @@ export class CreatePostDto {
     content: string;
 
     @ApiProperty({ example: 2, description: '게시판 ID' })
-    @IsNumber()
+    @IsInt()
     @IsNotEmpty()
     boardId: number;
 }

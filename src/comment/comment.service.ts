@@ -36,7 +36,7 @@ export class CommentService {
             author: user,
             post,
         });
-        return this.commentRepository.save(comment);
+        return plainToInstance(Comment, this.commentRepository.save(comment));
     }
 
     // Delete /comments/:id
