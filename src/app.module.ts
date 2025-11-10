@@ -12,6 +12,7 @@ import { CommentModule } from './comment/comment.module';
 import { Comment } from './comment/comment.entity';
 import { LikeModule } from './like/like.module';
 import { Like } from './like/like.entity';
+import { EventsGateway } from './events/events.gateway';
 
 
 @Module({
@@ -34,5 +35,6 @@ import { Like } from './like/like.entity';
     CommentModule,
     LikeModule,
   ],
+  providers: [EventsGateway],
 })
 export class AppModule {}

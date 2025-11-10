@@ -23,7 +23,7 @@ export class AuthService {
 
     // POST /auth/login
     async login(dto: LoginUserDto) {
-        const user = await this.userService.findByUsername(dto.email);
+        const user = await this.userService.findByEmail(dto.email);
         if (!user) throw new UnauthorizedException('존재하지 않는 사용자입니다.'); // 인증 실패 시 401 상태 응답
 
         const isMatch = await bcrypt.compare(dto.password, user.password);
