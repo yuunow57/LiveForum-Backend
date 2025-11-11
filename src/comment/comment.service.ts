@@ -6,12 +6,14 @@ import { Comment } from './comment.entity';
 import { User } from '../user/user.entity';
 import { Post } from '../post/post.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class CommentService {
     constructor (
         @InjectRepository(Comment)
         private readonly commentRepository: Repository<Comment>,
+        private readonly eventsGateway: EventsGateway,
     ) {}
 
     // Get /comments/:id
@@ -36,7 +38,17 @@ export class CommentService {
             author: user,
             post,
         });
-        return plainToInstance(Comment, this.commentRepository.save(comment));
+        const saved = await this.commentRepository.save(comment);
+
+        // WebSocket Event
+        this.eventsGateway.emitCommentAdded(post.id, {
+            id: saved.id,
+            content: saved.content,
+            author: { id: user.id, username: user.username },
+            createAt: saved.createAt,
+        });
+        
+        return plainToInstance(Comment, saved)
     }
 
     // Delete /comments/:id
