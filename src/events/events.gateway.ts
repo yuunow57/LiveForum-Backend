@@ -59,4 +59,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(room).emit('comment_added', comment);
     console.log(`Broadcast comment to ${room}`);
   }
+
+  emitLikeToggled(targetType: 'post' | 'comment', targetId: number, likeCount: number) {
+    const event = targetType === 'post' ? 'post_liked' : 'comment_liked';
+    const payload = { targetId, likeCount };
+    this.server.emit(event, payload);
+    console.log(`${event} broadcast ->`, payload);
+  }
 }
