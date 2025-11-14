@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } f
 import { Post } from '../post/post.entity';
 import { Comment } from "../comment/comment.entity";
 import { Like } from '../like/like.entity';
+import { Notification } from '../notification/notification.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity()
@@ -31,4 +32,7 @@ export class User {
 
     @OneToMany(() => Like, (likes) => likes.author)
     likes: Like[];
+
+    @OneToMany(() => Notification, (notifications) => notifications.author)
+    notifications: Notification[];
 }

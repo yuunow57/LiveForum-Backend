@@ -1,17 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Like } from './like.entity';
 import { User } from '../user/user.entity';
 import { LikeTargetDto } from './dto/like-target.dto';
 import { EventsGateway } from '../events/events.gateway';
+import { NotificationService } from '../notification/notification.service';
+import { Post } from '../post/post.entity';
+import { Comment } from '../comment/comment.entity';
 
 @Injectable()
 export class LikeService {
     constructor (
         @InjectRepository(Like)
         private readonly likeRepository: Repository<Like>,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
+        @InjectRepository(Post)
+        private readonly postRepository: Repository<Post>,
+        @InjectRepository(Comment)
+        private readonly commentRepository: Repository<Comment>,
         private readonly eventsGateway: EventsGateway,
+        private readonly notificationSerivece: NotificationService,
     ) {}
 
     // Post /likes, 좋아요 추가/삭제 (토글)
@@ -33,6 +43,28 @@ export class LikeService {
                 targetType: dto.targetType
             });
             await this.likeRepository.save(like);
+        }
+        // 좋아요 알림 전송
+        if (!existing) {
+            if (dto.targetType === 'post') {
+                const postAuthor = await this.userRepository.findOne({ where: { id: dto.targetId } });
+                if (!postAuthor) throw new NotFoundException('존재하지 않는 회원 입니다.');
+                await this.notificationSerivece.createNotification(
+                    postAuthor,
+                    'like',
+                    `${user.username}님이 당신의 게시글에 좋아요를 눌렀습니다.`,
+                    dto.targetId,
+                );
+            } else {
+                const commentAuthor = await this.userRepository.findOne({ where: { id: dto.targetId } });
+                if (!commentAuthor) throw new NotFoundException('존재하지 않는 회원 입니다.');
+                await this.notificationSerivece.createNotification(
+                    commentAuthor,
+                    'like',
+                    `${user.username}님이 당신의 댓글에 좋아요를 눌렀습니다.`,
+                    dto.targetId,
+                );
+            }
         }
 
         const likeCount = await this.countLikes(dto); // 좋아요 개수 함수 호출

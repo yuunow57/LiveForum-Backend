@@ -7,6 +7,7 @@ import { User } from '../user/user.entity';
 import { Post } from '../post/post.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { EventsGateway } from '../events/events.gateway';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class CommentService {
@@ -14,6 +15,7 @@ export class CommentService {
         @InjectRepository(Comment)
         private readonly commentRepository: Repository<Comment>,
         private readonly eventsGateway: EventsGateway,
+        private readonly notificationService: NotificationService,
     ) {}
 
     // Get /comments/:id
@@ -39,6 +41,16 @@ export class CommentService {
             post,
         });
         const saved = await this.commentRepository.save(comment);
+
+        // 게시글 작성자에게 알림 전송
+        if (post.author.id !== user.id) {
+            await this.notificationService.createNotification(
+                post.author,
+                'comment',
+                `${user.username}님이 게시글에 댓글을 남겼습니다.`,
+                post.id,
+            );
+        }
 
         // WebSocket Event
         this.eventsGateway.emitCommentAdded(post.id, {

@@ -13,6 +13,7 @@ import { Comment } from './comment/comment.entity';
 import { LikeModule } from './like/like.module';
 import { Like } from './like/like.entity';
 import { EventsGateway } from './events/events.gateway';
+import { NotificationModule } from './notification/notification.module';
 
 
 @Module({
@@ -34,6 +35,7 @@ import { EventsGateway } from './events/events.gateway';
     PostModule,
     CommentModule,
     LikeModule,
+    NotificationModule,
   ],
   providers: [EventsGateway],
 })
