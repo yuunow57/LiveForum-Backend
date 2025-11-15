@@ -81,4 +81,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(room).emit('notify_user', payload);
     console.log(`notify_user -> ${room}`, payload)
   }
+
+  // 알림 읽음 이벤트
+  emitNotificationRead(userId: number, notificationId: number) {
+    const room = `user:${userId}`;
+    this.server.to(room).emit(`notification_read`, { notificationId });
+    console.log(`notification_read -> ${room} | ${notificationId}`);
+  }
 }

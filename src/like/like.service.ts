@@ -16,10 +16,6 @@ export class LikeService {
         private readonly likeRepository: Repository<Like>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        @InjectRepository(Post)
-        private readonly postRepository: Repository<Post>,
-        @InjectRepository(Comment)
-        private readonly commentRepository: Repository<Comment>,
         private readonly eventsGateway: EventsGateway,
         private readonly notificationSerivece: NotificationService,
     ) {}

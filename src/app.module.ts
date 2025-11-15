@@ -14,6 +14,7 @@ import { LikeModule } from './like/like.module';
 import { Like } from './like/like.entity';
 import { EventsGateway } from './events/events.gateway';
 import { NotificationModule } from './notification/notification.module';
+import { Notification } from './notification/notification.entity';
 
 
 @Module({
@@ -26,7 +27,7 @@ import { NotificationModule } from './notification/notification.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Board, Post, Comment, Like],
+      entities: [User, Board, Post, Comment, Like, Notification],
       synchronize: true,
     }),
     UserModule,

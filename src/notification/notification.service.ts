@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToInstance } from 'class-transformer';
 import { Repository } from 'typeorm';
 import { Notification } from './notification.entity';
 import { User } from '../user/user.entity';
@@ -39,5 +38,26 @@ export class NotificationService {
             where: { author: { id: userId }},
             order: { createAt: 'DESC' },
         });
+    }
+
+    async findUnreadCount(userId: number) {
+        return this.notificationRepository.count({
+            where: { author: { id: userId }, isRead: false },
+        });
+    }
+
+    async markAsRead(id: number, userId: number) {
+        const notification = await this.notificationRepository.findOne({
+            where: { id, author: { id: userId } },
+        });
+        if (!notification) throw new NotFoundException('알림을 찾을 수 없습니다.');
+
+        notification.isRead = true;
+        const updated = await this.notificationRepository.save(notification);
+
+        // 실시간 읽음 알림 전송
+        this.eventsGateway.emitNotificationRead(userId, notification.id);
+
+        return updated;
     }
 }
