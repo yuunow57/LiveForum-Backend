@@ -20,11 +20,21 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    const user = client.data.user;
+    if (!user) {
+      console.log(' 비인증 소켓 연결 거부됨');
+      client.disconnect();
+      return;
+    }
+
+    const room = `user:${user.userId}`;
+    client.join(room);
+    console.log(`${user.username} (${user.userId}) connected to ${room}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    const user = client.data.user
+    if (user) console.log(`${user.username} (${user.userId}) disconnected`);
   }
 
   @SubscribeMessage('ping')
@@ -69,12 +79,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`${event} broadcast ->`, payload);
   }
 
-  @SubscribeMessage('join_user')
-  handleJoinUser(@MessageBody() data: { userId: number }, @ConnectedSocket() client: Socket) {
-    const room = `user:${data.userId}`;
-    client.join(room);
-    console.log(`User ${data.userId} join their notification room`);
-  }
+  // @SubscribeMessage('join_user')
+  // handleJoinUser(@MessageBody() data: { userId: number }, @ConnectedSocket() client: Socket) {
+  //   const room = `user:${data.userId}`;
+  //   client.join(room);
+  //   console.log(`User ${data.userId} join their notification room`);
+  // }
+  
   // 개별 사용자 알림 푸시
   emitUserNotification(userId: number, payload: any) {
     const room = `user:${userId}`;

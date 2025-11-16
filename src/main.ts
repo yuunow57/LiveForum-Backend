@@ -6,6 +6,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { JwtSocketAdapter } from './events/ws.dapter';
 import { UserService } from './user/user.service';
 import { BoardService } from './board/board.service';
 import { PostService } from './post/post.service';
@@ -21,6 +22,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalGuards(new JwtAuthGuard(new Reflector()));
+  app.useWebSocketAdapter(new JwtSocketAdapter(app));
 
   // Swagger 설정
   const config = new DocumentBuilder()
