@@ -8,7 +8,10 @@ import {
   OnGatewayDisconnect,
  } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { WsExceptionFilter } from '../common/filters/ws-exception.filter';
+import { UseFilters } from '@nestjs/common';
 
+@UseFilters(new WsExceptionFilter())
 @WebSocketGateway({
   cors: {
     origin: '*', // 모든 도메인 허용, 배포 시 도메인 변경
