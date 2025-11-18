@@ -27,7 +27,8 @@ export class PostController {
     @Get(':id')
     @ApiOperation({ summary: '게시글 상세 조회' })
     @ApiResponse({ status:200, description: '특정 게시글 반환' })
-    findOne(@Param('id') id: number) {
+    async findOne(@Param('id') id: number) {
+        await this.postService.updateViewCount(id);
         return this.postService.findOne(id);
     }
 

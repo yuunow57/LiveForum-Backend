@@ -15,6 +15,7 @@ import { Like } from './like/like.entity';
 import { EventsGateway } from './events/events.gateway';
 import { NotificationModule } from './notification/notification.module';
 import { Notification } from './notification/notification.entity';
+import { RedisModule } from './redis/redis.module';
 
 
 @Module({
@@ -37,6 +38,7 @@ import { Notification } from './notification/notification.entity';
     CommentModule,
     LikeModule,
     NotificationModule,
+    RedisModule,
   ],
   providers: [EventsGateway],
 })

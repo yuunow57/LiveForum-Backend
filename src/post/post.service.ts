@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
@@ -6,24 +6,70 @@ import { Post } from './post.entity';
 import { User } from '../user/user.entity';
 import { Board } from '../board/board.entity';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectRepository(Post)
         private readonly postRepository: Repository<Post>,
+        @Inject(CACHE_MANAGER)
+        private readonly cacheManager: Cache,
     ) {}
+
+    private readonly POPULAR_CACHE_KEY = 'popular_posts';
 
     // Get /posts
     async findAll() {
-        return plainToInstance(Post, this.postRepository.find({ order: { createAt: 'DESC' } }));
+
+        // 캐시에서 인기글 목록 확인
+        const cached = await this.cacheManager.get(this.POPULAR_CACHE_KEY);
+        if (cached) {
+            console.log('캐시에서 인기 게시글 가져옴');
+            return cached;
+        }
+
+        // DB 조회 (조회순)
+        const posts = await this.postRepository.find({
+            order: { viewCount: 'DESC' },
+            take: 10,
+        });
+
+        // 캐시 저장
+        await this.cacheManager.set(this.POPULAR_CACHE_KEY, posts, 1000 * 60 * 5);
+        console.log('인기 게시글 캐시 저장');
+
+        return plainToInstance(Post, posts);
     }
 
     // Get /posts/:id
     async findOne(id: number) {
-        const post = await this.postRepository.findOne({ where: { id } });
-        if (!post) throw new NotFoundException('게시글을 찾을 수 없습니다.');
+        const cacheKey = `post:${id}`;
+        const cached = await this.cacheManager.get<Post>(cacheKey);
+        if (cached) {
+            console.log(`캐시에서 게시글 ${id} 조회`);
+            return cached;
+        }
+
+        const post = await this.postRepository.findOne({
+            where: { id },
+            relations: ['author', 'board'],
+        });
+
+        if (post) {
+            await this.cacheManager.set(cacheKey, post, 1000 * 60 * 3);
+            console.log(`게시글 ${id} 캐시 저장`);
+        }
+
         return plainToInstance(Post, post);
+    }
+
+    // Get /posts/:id
+    async updateViewCount(id: number) {
+        await this.postRepository.increment({ id }, 'viewCount', 1);
+        await this.cacheManager.del(`post:${id}`); // 캐시 무효화
+        await this.cacheManager.del(this.POPULAR_CACHE_KEY) // 인기글 캐시 무효화
     }
 
     // Post /posts

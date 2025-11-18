@@ -16,6 +16,9 @@ export class Post {
     @Column({ type: 'text' })
     content: string;
 
+    @Column({ default: 0 })
+    viewCount: number;
+
     @Exclude()
     @CreateDateColumn()
     createAt: Date;
