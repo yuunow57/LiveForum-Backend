@@ -6,8 +6,7 @@ import { Post } from './post.entity';
 import { User } from '../user/user.entity';
 import { Board } from '../board/board.entity';
 import { CreatePostDto } from './dto/create-post.dto';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class PostService {
