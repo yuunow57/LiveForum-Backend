@@ -17,6 +17,7 @@ import { NotificationModule } from './notification/notification.module';
 import { Notification } from './notification/notification.entity';
 import { RedisModule } from './redis/redis.module';
 import { StatsModule } from './stats/stats.module';
+import { QueueModule } from './queue/queue.module';
 
 
 @Module({
@@ -41,6 +42,7 @@ import { StatsModule } from './stats/stats.module';
     NotificationModule,
     RedisModule,
     StatsModule,
+    QueueModule,
   ],
   providers: [EventsGateway],
 })

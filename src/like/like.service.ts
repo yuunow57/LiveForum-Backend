@@ -5,9 +5,7 @@ import { Like } from './like.entity';
 import { User } from '../user/user.entity';
 import { LikeTargetDto } from './dto/like-target.dto';
 import { EventsGateway } from '../events/events.gateway';
-import { NotificationService } from '../notification/notification.service';
-import { Post } from '../post/post.entity';
-import { Comment } from '../comment/comment.entity';
+import { NotificationProducer } from '../notification/notification.producer';
 
 @Injectable()
 export class LikeService {
@@ -17,7 +15,7 @@ export class LikeService {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
         private readonly eventsGateway: EventsGateway,
-        private readonly notificationSerivece: NotificationService,
+        private readonly notificationProducer: NotificationProducer,
     ) {}
 
     // Post /likes, 좋아요 추가/삭제 (토글)
@@ -45,21 +43,21 @@ export class LikeService {
             if (dto.targetType === 'post') {
                 const postAuthor = await this.userRepository.findOne({ where: { id: dto.targetId } });
                 if (!postAuthor) throw new NotFoundException('존재하지 않는 회원 입니다.');
-                await this.notificationSerivece.createNotification(
-                    postAuthor,
-                    'like',
-                    `${user.username}님이 당신의 게시글에 좋아요를 눌렀습니다.`,
-                    dto.targetId,
-                );
+                await this.notificationProducer.enqueueNotification({
+                    user: postAuthor,
+                    type: 'like',
+                    message: `${user.username}님이 당신의 게시글에 좋아요를 눌렀습니다.`,
+                    targetId: dto.targetId,
+                });
             } else {
                 const commentAuthor = await this.userRepository.findOne({ where: { id: dto.targetId } });
                 if (!commentAuthor) throw new NotFoundException('존재하지 않는 회원 입니다.');
-                await this.notificationSerivece.createNotification(
-                    commentAuthor,
-                    'like',
-                    `${user.username}님이 당신의 댓글에 좋아요를 눌렀습니다.`,
-                    dto.targetId,
-                );
+                await this.notificationProducer.enqueueNotification({
+                    user: commentAuthor,
+                    type: 'like',
+                    message: `${user.username}님이 당신의 댓글에 좋아요를 눌렀습니다.`,
+                    targetId: dto.targetId,
+                });
             }
         }
 
