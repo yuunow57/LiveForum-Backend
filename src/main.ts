@@ -10,6 +10,7 @@ import { JwtSocketAdapter } from './events/ws.dapter';
 import { UserService } from './user/user.service';
 import { BoardService } from './board/board.service';
 import { PostService } from './post/post.service';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,6 +19,14 @@ async function bootstrap() {
     forbidNonWhitelisted: true, // DTO에 정의되지 않은 속성이 있으면 에러 발생
     transform: true // 요청값을 DTO 클래스 인스턴스로 변환
   }));
+
+  app.enableCors({
+    origin: ['http://localhost:5173',],
+    credentials: true,
+    methods: 'GET,POST,PATCH,PUT,DELETE',
+  });
+
+  app.use(helmet());
 
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());

@@ -4,12 +4,17 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
     ) {}
 
     // POST /auth/register
@@ -21,6 +26,16 @@ export class AuthService {
         return { message: '회원가입 성공', user: newUser };
     }
 
+    // POST /auth/refresh
+    private generateAccessToken(user) {
+        return this.jwtService.signAsync({ sub: user.id, email: user.email }, { expiresIn: '1h' });
+    }
+
+    // POST /auth/refresh
+    private generateRefreshToken(user) {
+        return this.jwtService.signAsync({ sub: user.id }, { expiresIn: '14d' });
+    }
+
     // POST /auth/login
     async login(dto: LoginUserDto) {
         const user = await this.userService.findByEmail(dto.email);
@@ -29,8 +44,14 @@ export class AuthService {
         const isMatch = await bcrypt.compare(dto.password, user.password);
         if (!isMatch) throw new UnauthorizedException('올바르지 않은 비밀번호 입니다.');
 
-        const payload = { sub: user.id, email: user.email }; // 토큰에 담을 내용물
-        const token = await this.jwtService.signAsync(payload); // 토큰 생성
-        return { message: '로그인 성공', accessToken: token };
+        const accessToken = await this.generateAccessToken(user);
+        const refreshToken = await this.generateRefreshToken(user);
+
+        await this.userRepository.update(user.id, { refreshToken });
+        return {
+            message: '로그인 성공',
+            accessToken,
+            refreshToken,
+        };
     }
 }

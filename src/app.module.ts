@@ -18,6 +18,7 @@ import { Notification } from './notification/notification.entity';
 import { RedisModule } from './redis/redis.module';
 import { StatsModule } from './stats/stats.module';
 import { QueueModule } from './queue/queue.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 
 @Module({
@@ -32,6 +33,14 @@ import { QueueModule } from './queue/queue.module';
       database: process.env.DB_DATABASE,
       entities: [User, Board, Post, Comment, Like, Notification],
       synchronize: true,
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000, // ms기준 (60초)
+          limit: 20,
+        },
+      ],
     }),
     UserModule,
     AuthModule,
