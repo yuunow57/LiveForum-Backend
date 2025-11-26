@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
@@ -6,6 +6,7 @@ import { Comment } from './comment.entity';
 import { User } from '../user/user.entity';
 import { Post } from '../post/post.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 import { EventsGateway } from '../events/events.gateway';
 import { NotificationProducer } from '../notification/notification.producer';
 
@@ -18,7 +19,7 @@ export class CommentService {
         private readonly notificationProducer: NotificationProducer,
     ) {}
 
-    // Get /comments/:id
+    // GET /comments/:id
     async findAllByPost(postId: number) {
         return plainToInstance(Comment, this.commentRepository.find({ 
             where: { post: { id: postId } },
@@ -26,14 +27,14 @@ export class CommentService {
         }));
     }
 
-    // Get /comments/detail/:id
+    // GET /comments/detail/:id
     async findOne(id: number) {
         const comment = await this.commentRepository.findOne({ where: { id } });
         if (!comment) throw new NotFoundException('존재하지 않는 댓글 입니다.');
         return plainToInstance(Comment, comment);
     }
 
-    // Post /comments
+    // POST /comments
     async create(dto: CreateCommentDto, user: User, post: Post) {
         const comment = this.commentRepository.create({
             content: dto.content,
@@ -63,7 +64,17 @@ export class CommentService {
         return plainToInstance(Comment, saved)
     }
 
-    // Delete /comments/:id
+    // Patch /comments/:id
+    async update(id: number, userId: number, dto: UpdateCommentDto) {
+        const comment = await this.findOne(id)
+        if (comment.author.id !== userId) throw new ForbiddenException('수정 권한이 없습니다.');
+
+        if (dto.content !== undefined) comment.content = dto.content;
+        
+        return this.commentRepository.save(comment);
+    }
+
+    // DELETE /comments/:id
     async remove(id: number) {
         const comment = await this.findOne(id);
         return this.commentRepository.remove(comment);

@@ -1,8 +1,9 @@
-import { Controller, Body, Post, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Body, Post, Get, Patch, Delete, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BoardService } from './board.service';
 import { Public } from 'src/common/decorators/public.decorator';
 import { CreateBoardDto } from './dto/create-board.dto';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @ApiTags('Board')
 @Controller('boards')
@@ -30,6 +31,13 @@ export class BoardController {
     @ApiOperation({ summary: '게시판 생성 (관리자 전용)' })
     create(@Body() dto: CreateBoardDto) {
         return this.boardService.create(dto);
+    }
+
+    @Patch(':id')
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: '게시판 수정 (관리자 전용)' })
+    update(@Param('id') id: number, @Body() dto: UpdateBoardDto) {
+        return this.boardService.update(id, dto);
     }
 
     @Delete(':id')

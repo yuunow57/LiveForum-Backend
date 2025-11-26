@@ -1,10 +1,11 @@
-import { Controller, Body, Param, Post, Get, Delete, Req, NotFoundException } from '@nestjs/common';
+import { Controller, Body, Param, Post, Get, Patch, Delete, Req, NotFoundException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PostService } from './post.service';
 import { UserService } from '../user/user.service';
 import { BoardService } from '../board/board.service';
 import { Public } from '../common/decorators/public.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -40,6 +41,14 @@ export class PostController {
         if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
         const board = await this.boardService.findOne(dto.boardId);
         return this.postService.create(dto, user, board);
+    }
+
+    @Patch(':id')
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: '게시글 수정 (작성자 전용)' })
+    async update(@Param('id') id: number, @Req() req, @Body() dto: UpdatePostDto) {
+        const userId = req.user.id;
+        return this.postService.update(id, userId, dto);
     }
 
     @Delete(':id')

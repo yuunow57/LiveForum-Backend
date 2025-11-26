@@ -18,7 +18,7 @@ export class LikeService {
         private readonly notificationProducer: NotificationProducer,
     ) {}
 
-    // Post /likes, 좋아요 추가/삭제 (토글)
+    // POST /likes, 좋아요 추가/삭제 (토글)
     async toggleLike(user: User, dto: LikeTargetDto) {
         const existing = await this.likeRepository.findOne({
             where: { 
@@ -72,7 +72,7 @@ export class LikeService {
         };
     }
 
-    // Post /likes/count, 특정 대상의 좋아요 개수 조회
+    // POST /likes/count, 특정 대상의 좋아요 개수 조회
     async countLikes(dto: LikeTargetDto) {
         return this.likeRepository.count({ where: {
             targetId: dto.targetId,

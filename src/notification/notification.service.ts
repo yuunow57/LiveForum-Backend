@@ -34,7 +34,7 @@ export class NotificationService {
         return saved;
     }
 
-    // Get /notifications
+    // GET /notifications
     findAllByUser(userId: number) {
         return this.notificationRepository.find({
             where: { author: { id: userId }},
@@ -42,7 +42,7 @@ export class NotificationService {
         });
     }
 
-    // Get /notifications/unread-count
+    // GET /notifications/unread-count
     async findUnreadCount(userId: number) {
         return this.notificationRepository.count({
             where: { author: { id: userId }, isRead: false },

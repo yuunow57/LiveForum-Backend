@@ -1,0 +1,14 @@
+import { IsString, IsOptional } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+
+export class UpdatePostDto {
+    @ApiProperty({ example: '새 게시글 제목', required: false })
+    @IsOptional()
+    @IsString()
+    title?: string;
+
+    @ApiProperty({ example: '수정된 게시글 내용입니다.', required: false })
+    @IsOptional()
+    @IsString()
+    content?: string;
+}

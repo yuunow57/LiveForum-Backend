@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
@@ -6,6 +6,7 @@ import { Post } from './post.entity';
 import { User } from '../user/user.entity';
 import { Board } from '../board/board.entity';
 import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
@@ -19,7 +20,7 @@ export class PostService {
 
     private readonly POPULAR_CACHE_KEY = 'popular_posts';
 
-    // Get /posts
+    // GET /posts
     async findAll() {
 
         // 캐시에서 인기글 목록 확인
@@ -42,7 +43,7 @@ export class PostService {
         return plainToInstance(Post, posts);
     }
 
-    // Get /posts/:id
+    // GET /posts/:id
     async findOne(id: number) {
         const cacheKey = `post:${id}`;
         const cached = await this.cacheManager.get<Post>(cacheKey);
@@ -64,14 +65,14 @@ export class PostService {
         return plainToInstance(Post, post);
     }
 
-    // Get /posts/:id
+    // GET /posts/:id
     async updateViewCount(id: number) {
         await this.postRepository.increment({ id }, 'viewCount', 1);
         await this.cacheManager.del(`post:${id}`); // 캐시 무효화
         await this.cacheManager.del(this.POPULAR_CACHE_KEY) // 인기글 캐시 무효화
     }
 
-    // Post /posts
+    // POST /posts
     async create(dto: CreatePostDto, user: User, board: Board) {
         const post = this.postRepository.create({
             title: dto.title,
@@ -82,7 +83,19 @@ export class PostService {
         return this.postRepository.save(post);
     }
 
-    // Delete /posts/:id
+    // Patch /posts/:id
+    async update(id: number, userId: number, dto: UpdatePostDto) {
+        const post = await this.findOne(id);
+
+        if (post.author.id !== userId) throw new ForbiddenException('수정 권한이 없습니다.');
+
+        if (dto.title !== undefined) post.title = dto.title;
+        if (dto.content !== undefined) post.content = dto.content;
+
+        return this.postRepository.save(post);
+    }
+
+    // DELETE /posts/:id
     async remove(id: number) {
         const post = await this.findOne(id);
         if (!post) throw new NotFoundException('게시글을 찾을 수 없습니다.');

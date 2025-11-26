@@ -21,7 +21,7 @@ export class StatsService {
 
     private readonly STATS_CACHE_KEY = 'stats:daily';
 
-    // Get /stats/daily
+    // GET /stats/daily
     async getDailyStats() {
         // 캐시 데이터 확인
         const cached = await this.cacheManager.get(this.STATS_CACHE_KEY);// 레디스에 해당 키를 가진 데이터를 조회

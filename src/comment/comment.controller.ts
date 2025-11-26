@@ -1,10 +1,11 @@
-import { Controller, Body, Param, Post, Get, Delete, Req, NotFoundException } from '@nestjs/common';
+import { Controller, Body, Param, Post, Get, Patch, Delete, Req, NotFoundException } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CommentService } from './comment.service';
 import { UserService } from '../user/user.service';
 import { PostService } from '../post/post.service';
 import { Public } from '../common/decorators/public.decorator';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('Comment')
 @Controller('comments')
@@ -31,6 +32,14 @@ export class CommentController {
         if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
         const post = await this.postService.findOne(dto.postId);
         return this.commentService.create(dto, user, post);
+    }
+
+    @Patch(':id')
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: '댓글 수정 (로그인 필요)' })
+    async update(@Param('id') id: number, @Req() req, @Body() dto: UpdateCommentDto) {
+        const userId = req.user.id;
+        return this.commentService.update(id, userId, dto);
     }
 
     @Delete(':id')
