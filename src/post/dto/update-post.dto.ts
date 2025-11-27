@@ -1,19 +1,20 @@
-import { IsString, IsOptional, IsInt } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsOptional, IsInt, IsArray } from "class-validator";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class UpdatePostDto {
-    @ApiProperty({ example: '새 게시글 제목', required: false })
+    @ApiPropertyOptional({ example: '새 게시글 제목' })
     @IsOptional()
     @IsString()
     title?: string;
 
-    @ApiProperty({ example: '수정된 게시글 내용입니다.', required: false })
+    @ApiPropertyOptional({ example: '수정된 게시글 내용입니다.' })
     @IsOptional()
     @IsString()
     content?: string;
 
-    @ApiProperty({ example: '유지 할 이미지 내용', required: false })
+    @ApiPropertyOptional({ example: [1, 2, 3], description: '유지할 기존 이미지 ID 배열' })
     @IsOptional()
-    @IsInt()
-    keepImageIds?: number;
+    @IsArray()
+    @IsInt({ each: true })
+    keepImageIds?: number[];
 }
