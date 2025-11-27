@@ -9,6 +9,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { PostImage } from './post-image.entity';
+import { Not, In } from 'typeorm';
 
 @Injectable()
 export class PostService {
@@ -102,6 +103,17 @@ export class PostService {
 
         if (dto.title !== undefined) post.title = dto.title;
         if (dto.content !== undefined) post.content = dto.content;
+
+        const keepImageIds = dto.keepImageIds ?? [];
+
+        if (keepImageIds.length > 0) {
+            await this.postImageRepository.delete({
+                post: post,
+                id: Not(In(keepImageIds))
+            });
+        } else {
+            await this.postImageRepository.delete({ post });
+        }
 
         if (files?.length > 0) {
             const newImages = files.map(file =>

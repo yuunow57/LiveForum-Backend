@@ -116,13 +116,14 @@ describe('PostService', () => {
     const dto = { title: 'Test', content: 'Content', boardId: 1 };
     const user = new User();
     const board = new Board();
+    const files = [];
 
     const mockPost = { id: 1, ...dto };
 
     mockPostRepository.create.mockReturnValue(mockPost);
     mockPostRepository.save.mockResolvedValue(mockPost);
 
-    const result = await postService.create(dto, user, board);
+    const result = await postService.create(dto, user, board, files);
 
     expect(postRepository.create).toHaveBeenCalled();
     expect(postRepository.save).toHaveBeenCalled();
