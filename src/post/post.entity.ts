@@ -3,6 +3,7 @@ import { Exclude } from "class-transformer";
 import { Board } from "../board/board.entity";
 import { User } from "../user/user.entity";
 import { Comment } from "../comment/comment.entity";
+import { PostImage } from "./post-image.entity";
 
 @Entity()
 export class Post {
@@ -34,4 +35,7 @@ export class Post {
 
     @OneToMany(() => Comment, (comment) => comment.post)
     comments: Comment[];
+
+    @OneToMany(() => PostImage, (img) => img.post, { cascade: true })
+    images: PostImage[];
 }

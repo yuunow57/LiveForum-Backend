@@ -8,12 +8,15 @@ import { Board } from '../board/board.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { PostImage } from './post-image.entity';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectRepository(Post)
         private readonly postRepository: Repository<Post>,
+        @InjectRepository(PostImage)
+        private readonly postImageRepository: Repository<PostImage>,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
     ) {}
@@ -73,24 +76,42 @@ export class PostService {
     }
 
     // POST /posts
-    async create(dto: CreatePostDto, user: User, board: Board) {
+    async create(dto: CreatePostDto, user: User, board: Board, files: Express.Multer.File[]) {
         const post = this.postRepository.create({
             title: dto.title,
             content: dto.content,
             author: user,
             board,
         });
+
+        if (files && files.length > 0) {
+            post.images = files.map(file => {
+                return this.postImageRepository.create({
+                    url: `/uploads/posts/${file.filename}`,
+                });
+            });
+        }
         return this.postRepository.save(post);
     }
 
     // Patch /posts/:id
-    async update(id: number, userId: number, dto: UpdatePostDto) {
+    async update(id: number, userId: number, dto: UpdatePostDto, files: Express.Multer.File[]) {
         const post = await this.findOne(id);
 
         if (post.author.id !== userId) throw new ForbiddenException('수정 권한이 없습니다.');
 
         if (dto.title !== undefined) post.title = dto.title;
         if (dto.content !== undefined) post.content = dto.content;
+
+        if (files?.length > 0) {
+            const newImages = files.map(file =>
+                this.postImageRepository.create({
+                    url: `/uploads/posts/${file.filename}`,
+                    post: post,
+                }),
+            );
+            await this.postImageRepository.save(newImages);
+        }
 
         return this.postRepository.save(post);
     }

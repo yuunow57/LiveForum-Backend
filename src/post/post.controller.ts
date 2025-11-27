@@ -1,11 +1,12 @@
-import { Controller, Body, Param, Post, Get, Patch, Delete, Req, NotFoundException } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Body, Param, Post, Get, Patch, Delete, Req, NotFoundException, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { PostService } from './post.service';
 import { UserService } from '../user/user.service';
 import { BoardService } from '../board/board.service';
 import { Public } from '../common/decorators/public.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Post')
 @Controller('posts')
@@ -36,19 +37,46 @@ export class PostController {
     @Post()
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '게시글 작성 (로그인 필요)' })
-    async create(@Req() req, @Body() dto: CreatePostDto) {
+    @UseInterceptors(FilesInterceptor('images', 10))
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+        type: 'object',
+        properties: {
+            boardId: { type: 'number' },
+            title: { type: 'string' },
+            content: { type: 'string' },
+            images: {
+            type: 'array',
+            items: { type: 'string', format: 'binary' },
+            },
+        },
+        },
+    })
+    async create(
+        @Req() req,
+        @Body() dto: CreatePostDto,
+        @UploadedFiles() files: Express.Multer.File[],
+    ) {
         const user = await this.userService.findOne(req.user.userId);
         if (!user) throw new NotFoundException('존재하지 않는 회원 입니다.');
         const board = await this.boardService.findOne(dto.boardId);
-        return this.postService.create(dto, user, board);
+        return this.postService.create(dto, user, board, files);
     }
 
     @Patch(':id')
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '게시글 수정 (작성자 전용)' })
-    async update(@Param('id') id: number, @Req() req, @Body() dto: UpdatePostDto) {
+    @UseInterceptors(FilesInterceptor('images', 10))
+    @ApiConsumes('multipart/form-data')
+    async update(
+        @Param('id') id: number,
+        @Req() req,
+        @Body() dto: UpdatePostDto,
+        @UploadedFiles() files: Express.Multer.File[],
+    ) {
         const userId = req.user.id;
-        return this.postService.update(id, userId, dto);
+        return this.postService.update(id, userId, dto, files);
     }
 
     @Delete(':id')

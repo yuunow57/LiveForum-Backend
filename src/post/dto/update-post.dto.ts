@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from "class-validator";
+import { IsString, IsOptional, IsInt } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class UpdatePostDto {
@@ -11,4 +11,9 @@ export class UpdatePostDto {
     @IsOptional()
     @IsString()
     content?: string;
+
+    @ApiProperty({ example: '유지 할 이미지 내용', required: false })
+    @IsOptional()
+    @IsInt()
+    keepImageIds?: number;
 }
