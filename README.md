@@ -1,64 +1,252 @@
-# 🧱 LiveForum - 실시간 커뮤니티 서버
+# 🔥 LiveForum — 실시간 커뮤니티 플랫폼 (NestJS + WebSocket)
 
-> NestJS + TypeScript + MySQL + WebSocket 기반 백엔드 포트폴리오 프로젝트  
-> 1주차 목표: 인증 시스템 + 전역 설정 + Swagger 완성
-
----
-
-## ⚙️ Tech Stack
-
-| 구분 | 기술 |
-|:--|:--|
-| Language | TypeScript |
-| Framework | NestJS |
-| Database | MySQL (TypeORM) |
-| Auth | JWT + bcrypt |
-| Real-time | WebSocket (Socket.io Gateway 예정) |
-| Docs | Swagger `/api/docs` |
-| Deployment | Render / Railway (예정) |
+> **실시간 댓글 · 좋아요 · 알림 · 조회수 · 통계 · 캐싱 · 인증**  
+> NestJS & WebSocket 기반의 고성능 커뮤니티 서버  
+> (1인 개발, 백엔드 100% 기여)
 
 ---
 
-## 📁 Folder Structure
+## 🚀 프로젝트 소개
 
-src/  
-├─ common/  
-├─ auth/  
-├─ user/  
-└─ main.ts  
+**LiveForum**은 실시간 웹소켓을 기반으로 한 고성능 커뮤니티 플랫폼입니다.  
+댓글·좋아요·알림이 **즉시 반영되는 빠른 사용자 경험**을 목표로 개발되었으며,
 
+- WebSocket 실시간 기능  
+- Redis 캐싱  
+- JWT + Refresh Token 인증  
+- BullMQ 큐 처리  
+- 통계 API  
+- 보안 강화(Rate Limit, Helmet, ValidationPipe)  
+
+등 실무에서 요구되는 대부분의 백엔드 기술을 구현한 프로젝트입니다.
 
 ---
 
-## 🚀 실행 방법
+## 🛠 기술 스택
 
-```bash
-# 1️⃣ 설치
+### **Backend**
+- **NestJS**
+- **TypeScript**
+- **MySQL + TypeORM**
+- **Redis (캐싱, Pub/Sub)**
+- **Socket.io (WebSocket Gateway)**
+- **JWT + Refresh Token**
+- **BullMQ (Queue)**
+- **Jest (Unit Test)**
+- **Swagger**
+
+### **Infra**
+- Render (Backend, 예정)
+- Vercel (Frontend, 예정)
+- Railway / PlanetScale (MySQL)
+- Upstash Redis (서버리스 Redis)
+
+---
+
+## 📂 폴더 구조
+
+```plaintext
+src/
+ ├─ app.module.ts
+ ├─ main.ts
+ │
+ ├─ auth/                # 로그인, 회원가입, JWT, Refresh Token
+ │   ├─ auth.controller.ts
+ │   ├─ auth.service.ts
+ │   ├─ jwt.strategy.ts
+ │   └─ dto/
+ │
+ ├─ user/                # 유저 정보 관리
+ │   ├─ user.controller.ts
+ │   ├─ user.service.ts
+ │   └─ user.entity.ts
+ │
+ ├─ post/                # 게시글 CRUD
+ │   ├─ post.controller.ts
+ │   ├─ post.service.ts
+ │   └─ post.entity.ts
+ │
+ ├─ comment/             # 댓글 CRUD + 실시간 이벤트
+ │   ├─ comment.controller.ts
+ │   ├─ comment.service.ts
+ │   └─ comment.gateway.ts
+ │
+ ├─ like/                # 좋아요 (게시글 / 댓글 공통)
+ │
+ ├─ notification/        # 실시간 알림 시스템
+ │
+ ├─ events/              # WebSocket Gateway & JWT Adapter
+ │   ├─ events.gateway.ts
+ │   └─ ws.jwt.adapter.ts
+ │
+ ├─ redis/               # Redis 캐싱
+ │   ├─ redis.module.ts
+ │   └─ redis.service.ts
+ │
+ ├─ queue/               # BullMQ 비동기 처리
+ │
+ ├─ stats/               # 통계 API
+ │
+ └─ common/              # 공통 Exception / Guard / Decorators
+✨ 주요 기능 요약
+✔️ 1. 회원가입 / 로그인 (JWT + Refresh Token)
+Access Token + Refresh Token 발급
+
+Refresh Token DB 저장
+
+/auth/refresh 로 Access Token 자동 재발급
+
+bcrypt 비밀번호 암호화
+
+WebSocket 연결 시에도 JWT 인증 적용
+
+✔️ 2. 게시글(Post) CRUD
+작성 / 조회 / 수정 / 삭제
+
+정렬(최신순, 인기순)
+
+페이지네이션
+
+조회수 증가 + Redis 캐시 무효화 처리
+
+인기글 캐싱
+
+✔️ 3. 댓글(Comment) 실시간 반영 (WebSocket)
+댓글 생성 시 해당 게시글 Room에게만 실시간 송출
+
+이벤트 이름: comment_added
+
+REST + WebSocket 동시에 활용하는 하이브리드 구조
+
+✔️ 4. 좋아요(Likes) — 단일 테이블 구조
+Like 테이블 하나로 게시글/댓글 좋아요 통합
+
+targetType: 'post' | 'comment'
+
+좋아요/취소 시 실시간 반영 이벤트 송출
+
+✔️ 5. 알림(Notification) 시스템
+댓글/좋아요 발생 시 알림 자동 생성
+
+사용자 개인 방(user:{id})에 push
+
+읽음 처리 API 제공
+
+WebSocket 기반 실시간 알림
+
+✔️ 6. Redis 캐싱
+post:{id} 게시글 캐싱
+
+인기 글 캐싱
+
+TTL 기반 자동 만료
+
+viewCount 증가 시 캐시 무효화
+
+✔️ 7. 통계 API
+일별 게시글/댓글 수
+
+활동량 증가 분석용 간단한 Analytics
+
+관리자 페이지 확장 가능 구조
+
+✔️ 8. 보안 강화
+helmet: XSS 및 웹 취약점 보호
+
+throttler: IP당 60초 20회 요청 제한
+
+ValidationPipe + DTO
+
+CORS 제한
+
+WebSocket 인증(JWT Adapter)
+
+✔️ 9. 테스트 (Jest)
+AuthService 단위 테스트
+
+PostService 단위 테스트
+
+Mock Repository 기반 서비스 로직 검증
+
+🧱 ERD (텍스트 버전)
+scss
+코드 복사
+User (1) ──── (N) Post
+User (1) ──── (N) Comment
+Post (1) ──── (N) Comment
+Post (1) ──── (N) Like
+Comment (1) ─ (N) Like
+User (1) ─── (N) Notification
+🧭 전체 아키텍처 (REST + WebSocket + Redis)
+REST 흐름
+Auth
+
+Posts
+
+Comments
+
+Likes
+
+Notifications
+
+Stats
+
+WebSocket 흐름
+arduino
+코드 복사
+Client → ws connect → JWT 인증 → events.gateway
+
+게시글 방: post:{id}
+    → 댓글 추가 시 실시간 전송
+
+개인 방: user:{id}
+    → 알림 실시간 push
+Redis
+캐싱 계층
+
+WebSocket pub/sub
+
+인기글 TTL 관리
+
+⚙️ 실행 방법
+bash
+코드 복사
 npm install
-
-# 2️⃣ 환경 변수 설정 (.env)
-DB_HOST=localhost
-DB_PORT=3306
-DB_USERNAME=root
-DB_PASSWORD=mysql123
-DB_DATABASE=liveforum
-JWT_SECRET=my_secret_key
-PORT=3000
-
-# 3️⃣ 실행
 npm run start:dev
+.env 예시
+ini
+코드 복사
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=1234
+DB_NAME=liveforum
+JWT_SECRET=mysecret
+REDIS_HOST=localhost
+REDIS_PORT=6379
+📘 API 문서
+Swagger URL
 
-# 4️⃣ Swagger 확인
-http://localhost:3000/api/docs
+bash
+코드 복사
+/api/docs
+📌 개발 진행 상황
+ 백엔드 핵심 기능 구현
 
-🧩 Features
+ WebSocket 실시간 기능
 
-✅ 회원가입 / 로그인 / JWT 인증
+ JWT + Refresh Token
 
-✅ ValidationPipe / Interceptor / Filter 전역 적용
+ Redis 캐싱
 
-✅ Swagger 자동 문서화
+ 통계 API
 
-🔜 게시판 / 게시글 / 댓글 / 좋아요
+ 보안 강화
 
-🔜 WebSocket 실시간 알림
+ Jest 단위 테스트
+
+ 프론트엔드 작업 (Week 5–6)
+
+ 배포 (프론트 완료 후 진행)
+
+📎 라이선스
+MIT License
