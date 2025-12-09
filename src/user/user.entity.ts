@@ -13,18 +13,15 @@ export class User {
     @Column({ unique: true })
     username: string;
 
-    @Exclude()
     @Column()
     password: string;
 
     @Column()
     email: string;
 
-    @Exclude()
     @Column({ nullable: true })
     refreshToken: string;
 
-    @Exclude()
     @CreateDateColumn() // 레코드가 처음 만들어진 시각을 기록
     createAt: Date;
 

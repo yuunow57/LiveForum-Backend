@@ -8,6 +8,7 @@ import { BoardModule } from './board/board.module';
 import { Board } from './board/board.entity';
 import { PostModule } from './post/post.module';
 import { Post } from './post/post.entity';
+import { PostImage } from './post/post-image.entity';
 import { CommentModule } from './comment/comment.module';
 import { Comment } from './comment/comment.entity';
 import { LikeModule } from './like/like.module';
@@ -31,7 +32,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [User, Board, Post, Comment, Like, Notification],
+      entities: [User, Board, Post, Comment, Like, Notification, PostImage],
       synchronize: true,
     }),
     ThrottlerModule.forRoot({

@@ -26,7 +26,7 @@ export class AuthService {
         return { message: '회원가입 성공', user: newUser };
     }
 
-    // POST /auth/refresh
+    // POST /auth/access
     private generateAccessToken(user) {
         return this.jwtService.signAsync({ sub: user.id, email: user.email }, { expiresIn: '1h' });
     }

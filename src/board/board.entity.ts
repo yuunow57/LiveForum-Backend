@@ -13,7 +13,6 @@ export class Board {
     @Column({ nullable: true })
     description: string;
 
-    @Exclude()
     @CreateDateColumn()
     createAt: Date;
 

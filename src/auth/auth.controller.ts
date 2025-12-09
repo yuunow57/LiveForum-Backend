@@ -1,4 +1,4 @@
-import { Controller, Body, Post, UnauthorizedException } from '@nestjs/common';
+import { Controller, Body, Post, UnauthorizedException, Req, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -52,5 +52,13 @@ export class AuthController {
         );
 
         return { accessToken: newAccessToken };
+    }
+
+    @Get('me')
+    async me(@Req() req) {
+        return {
+            success: true,
+            data: req.user,
+        };
     }
 }

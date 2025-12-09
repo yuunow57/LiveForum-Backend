@@ -20,7 +20,6 @@ export class Post {
     @Column({ default: 0 })
     viewCount: number;
 
-    @Exclude()
     @CreateDateColumn()
     createAt: Date;
 
