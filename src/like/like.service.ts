@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Like } from './like.entity';
 import { User } from '../user/user.entity';
+import { Post } from '../post/post.entity';
+import { Comment } from '../comment/comment.entity';
 import { LikeTargetDto } from './dto/like-target.dto';
 import { EventsGateway } from '../events/events.gateway';
 import { NotificationProducer } from '../notification/notification.producer';
@@ -14,6 +16,10 @@ export class LikeService {
         private readonly likeRepository: Repository<Like>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(Post)
+        private readonly postRepository: Repository<Post>,
+        @InjectRepository(Comment)
+        private readonly commentRepository: Repository<Comment>,
         private readonly eventsGateway: EventsGateway,
         private readonly notificationProducer: NotificationProducer,
     ) {}
@@ -41,8 +47,9 @@ export class LikeService {
         // 좋아요 알림 전송
         if (!existing) {
             if (dto.targetType === 'post') {
-                const postAuthor = await this.userRepository.findOne({ where: { id: dto.targetId } });
-                if (!postAuthor) throw new NotFoundException('존재하지 않는 회원 입니다.');
+                const post = await this.postRepository.findOne({ where: { id: dto.targetId } });
+                if (!post) throw new NotFoundException('존재하지 않는 회원 입니다.');
+                const postAuthor = post.author;
                 await this.notificationProducer.enqueueNotification({
                     user: postAuthor,
                     type: 'like',
@@ -50,8 +57,9 @@ export class LikeService {
                     targetId: dto.targetId,
                 });
             } else {
-                const commentAuthor = await this.userRepository.findOne({ where: { id: dto.targetId } });
-                if (!commentAuthor) throw new NotFoundException('존재하지 않는 회원 입니다.');
+                const comment = await this.commentRepository.findOne({ where: { id: dto.targetId } });
+                if (!comment) throw new NotFoundException('존재하지 않는 회원 입니다.');
+                const commentAuthor = comment.author;
                 await this.notificationProducer.enqueueNotification({
                     user: commentAuthor,
                     type: 'like',

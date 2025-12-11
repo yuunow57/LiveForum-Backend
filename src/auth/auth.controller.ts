@@ -56,9 +56,11 @@ export class AuthController {
 
     @Get('me')
     async me(@Req() req) {
+        const id = req.user.userId;
+        const user = await this.userService.findOne(id);
         return {
-            success: true,
-            data: req.user,
+            id,
+            username: user.username,
         };
     }
 }

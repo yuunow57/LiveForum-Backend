@@ -30,4 +30,12 @@ export class LikeController {
         const count = await this.likeService.countLikes(dto);
         return { targetId: dto.targetId, targetType: dto.targetType, count };
     }
+
+    @Post('isLiked')
+    @ApiBearerAuth('access-token')
+    async isLiked(@Req() req, @Body() dto: LikeTargetDto) {
+    const user = await this.userSerivce.findOne(req.user.userId);
+    return { liked: await this.likeService.isLikedByUser(user, dto) };
+    }
+
 }
