@@ -11,9 +11,11 @@ import { UserService } from './user/user.service';
 import { BoardService } from './board/board.service';
 import { PostService } from './post/post.service';
 import helmet from 'helmet';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // DTO에 정의되지 않은 값을 무시
     forbidNonWhitelisted: true, // DTO에 정의되지 않은 속성이 있으면 에러 발생
@@ -24,6 +26,10 @@ async function bootstrap() {
     origin: ['http://localhost:5173',],
     credentials: true,
     methods: 'GET,POST,PATCH,PUT,DELETE',
+  });
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads',
   });
 
   app.use(helmet());

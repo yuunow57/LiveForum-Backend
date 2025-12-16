@@ -75,8 +75,11 @@ export class CommentService {
     }
 
     // DELETE /comments/:id
-    async remove(id: number) {
+    async remove(id: number, userId: number) {
         const comment = await this.findOne(id);
+
+        if (comment.author.id !== userId)
+            throw new ForbiddenException("삭제 권한이 없습니다.");
         return this.commentRepository.remove(comment);
     }
 }

@@ -24,6 +24,14 @@ export class CommentController {
         return this.commentService.findAllByPost(id);
     }
 
+    @Public()
+    @Get('detail/:id')
+    @ApiOperation({ summary: '댓글 상세 조회' })
+    @ApiResponse({ status: 200, description: '댓글 상세 정보 반환' })
+    findOne(@Param('id') id: number) {
+        return this.commentService.findOne(id);
+    }
+
     @Post()
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '댓글 작성 (로그인 필요)' })
@@ -38,14 +46,15 @@ export class CommentController {
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '댓글 수정 (로그인 필요)' })
     async update(@Param('id') id: number, @Req() req, @Body() dto: UpdateCommentDto) {
-        const userId = req.user.id;
+        const userId = req.user.userId;
         return this.commentService.update(id, userId, dto);
     }
 
     @Delete(':id')
     @ApiBearerAuth('access-token')
     @ApiOperation({ summary: '댓글 삭제 (작성자 전용)' })
-    remove(@Param('id') id: number) {
-        return this.commentService.remove(id);
+    remove(@Param('id') id: number, @Req() req) {
+        const userId = req.user.userId
+        return this.commentService.remove(id, userId);
     }
 }

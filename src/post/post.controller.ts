@@ -1,4 +1,4 @@
-import { Controller, Body, Param, Post, Get, Patch, Delete, Req, NotFoundException, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, Body, Param, Post, Get, Patch, Delete, Req, Query, NotFoundException, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { PostService } from './post.service';
 import { UserService } from '../user/user.service';
@@ -21,8 +21,8 @@ export class PostController {
     @Get()
     @ApiOperation({ summary: '게시글 목록 조회' })
     @ApiResponse({ status:200, description: '게시글 목록 반환' })
-    findAll() {
-        return this.postService.findAll();
+    findAll(@Query('boardId') boardId?: number) {
+        return this.postService.findAll(boardId);
     }
 
     @Public()
@@ -75,7 +75,7 @@ export class PostController {
         @Body() dto: UpdatePostDto,
         @UploadedFiles() files: Express.Multer.File[],
     ) {
-        const userId = req.user.id;
+        const userId = req.user.userId;
         return this.postService.update(id, userId, dto, files);
     }
 

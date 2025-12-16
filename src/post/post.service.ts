@@ -24,8 +24,15 @@ export class PostService {
 
     private readonly POPULAR_CACHE_KEY = 'popular_posts';
 
-    // GET /posts
-    async findAll() {
+    // GET /posts or /posts?boardId
+    async findAll(boardId?: number) {
+        
+        if (boardId) {
+            return this.postRepository.find({
+                where: { board: { id: boardId } },
+                order: { createAt: 'DESC' },
+            });
+        }
 
         // 캐시에서 인기글 목록 확인
         const cached = await this.cacheManager.get(this.POPULAR_CACHE_KEY);
@@ -58,7 +65,7 @@ export class PostService {
 
         const post = await this.postRepository.findOne({
             where: { id },
-            relations: ['author', 'board'],
+            relations: ['author', 'board', 'images', 'comments'],
         });
 
         if (post) {
